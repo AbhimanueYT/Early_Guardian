@@ -24,7 +24,7 @@ Future<void> initializeService() async {
       isForegroundMode: true,
       notificationChannelId: 'udp_channel',
       initialNotificationTitle: 'UDP Listener',
-      initialNotificationContent: 'Listening for UDP packets on port 5005...',
+      // initialNotificationContent: 'Listening for UDP packets on port 5005...',
       foregroundServiceNotificationId: 888,
     ),
     iosConfiguration: IosConfiguration(
@@ -41,10 +41,10 @@ void onStart(ServiceInstance service) async {
   if (service is AndroidServiceInstance) {
     try {
       service.setAsForegroundService();
-      service.setForegroundNotificationInfo(
-        title: "UDP Listener",
-        content: "Initializing UDP listener...",
-      );
+      // service.setForegroundNotificationInfo(
+      //   title: "UDP Listener",
+      //   content: "Initializing UDP listener...",
+      // );
     } catch (e) {
       print('[UDP Receiver] Error setting foreground service: $e');
       // Continue anyway, the service might still work
@@ -79,10 +79,10 @@ void onStart(ServiceInstance service) async {
 
     // Update notification to show successful binding
     if (service is AndroidServiceInstance) {
-      service.setForegroundNotificationInfo(
-        title: "UDP Listener Active",
-        content: "Listening on port 5005",
-      );
+      // service.setForegroundNotificationInfo(
+      //   title: "UDP Listener Active",
+      //   content: "Listening on port 5005",
+      // );
     }
   } catch (e) {
     print('[UDP Receiver] Failed to bind to port 5005: $e');
@@ -93,10 +93,10 @@ void onStart(ServiceInstance service) async {
       print('[UDP Receiver] Successfully bound to alternative port 5006');
 
       if (service is AndroidServiceInstance) {
-        service.setForegroundNotificationInfo(
-          title: "UDP Listener Active",
-          content: "Listening on port 5006 (5005 was busy)",
-        );
+        // service.setForegroundNotificationInfo(
+        //   title: "UDP Listener Active",
+        //   content: "Listening on port 5006 (5005 was busy)",
+        // );
       }
     } catch (e2) {
       print('[UDP Receiver] Failed to bind to alternative port 5006: $e2');
@@ -107,18 +107,18 @@ void onStart(ServiceInstance service) async {
         print('[UDP Receiver] Successfully bound to dynamic port');
 
         if (service is AndroidServiceInstance) {
-          service.setForegroundNotificationInfo(
-            title: "UDP Listener Active",
-            content: "Listening on dynamic port",
-          );
+          // service.setForegroundNotificationInfo(
+          //   title: "UDP Listener Active",
+          //   content: "Listening on dynamic port",
+          // );
         }
       } catch (e3) {
         print('[UDP Receiver] Failed to bind to any port: $e3');
         if (service is AndroidServiceInstance) {
-          service.setForegroundNotificationInfo(
-            title: "UDP Listener Error",
-            content: "Failed to bind to any port. Check network permissions.",
-          );
+          // service.setForegroundNotificationInfo(
+          //   title: "UDP Listener Error",
+          //   content: "Failed to bind to any port. Check network permissions.",
+          // );
         }
         return;
       }
@@ -229,11 +229,11 @@ void onStart(ServiceInstance service) async {
       // Update notification periodically to show service is still alive
       if (service is AndroidServiceInstance) {
         try {
-          service.setForegroundNotificationInfo(
-            title: "UDP Listener Active",
-            content:
-                "Listening for UDP packets... (${notificationId} messages received)",
-          );
+          // service.setForegroundNotificationInfo(
+          //   title: "UDP Listener Active",
+          //   content:
+          //       "Listening for UDP packets... (${notificationId} messages received)",
+          // );
         } catch (e) {
           print('[UDP Receiver] Error updating periodic notification: $e');
         }
