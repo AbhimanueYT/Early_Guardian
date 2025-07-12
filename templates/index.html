@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Landslide Monitoring Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 20px; margin: 10px 0; border-radius: 5px; }
+        .normal { background: #d1ecf1; color: #0c5460; }
+        .high-risk { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .history {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .sensor-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <h1>Landslide Monitoring Admin Panel</h1>
+    
+    <div id="status" class="status"></div>
+    
+    <button id="startBtn">Start Monitoring</button>
+    <button id="stopBtn">Stop Monitoring</button>
+    
+    <h2>Monitoring Console</h2>
+    <div id="console" class="console"></div>
+    
+    <h2>Live Sensor Data</h2>
+    <div id="sensorData" class="sensor-data"></div>
+    
+    <h2>History</h2>
+    <button id="clearHistoryBtn">Clear History</button>
+    <div id="history" class="history"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.textContent = `Current Status: ${data.last_risk_status}`;
+                    statusDiv.className = `status ${data.last_risk_status.includes('High') ? 'high-risk' : 'normal'}`;
+                });
+        }
+
+        startBtn.addEventListener('click', () => {
+            fetch('/start', { method: 'POST' })
+                .then(() => updateStatus());
+        });
+
+        stopBtn.addEventListener('click', () => {
+            fetch('/stop', { method: 'POST' })
+                .then(() => updateStatus());
+        });
+
+        const consoleDiv = document.getElementById('console');
+        const historyDiv = document.getElementById('history');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        function addConsoleMessage(message) {
+            const p = document.createElement('p');
+            p.textContent = message;
+            consoleDiv.appendChild(p);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function updateHistory() {
+            fetch('/history')
+                .then(response => response.json())
+                .then(data => {
+                    historyDiv.innerHTML = data.map(item => `
+                        <div class="history-item">
+                            <strong>${item.timestamp}</strong>: ${item.status}
+                        </div>
+                    `).join('');
+                });
+        }
+
+        clearHistoryBtn.addEventListener('click', () => {
+            fetch('/clear_history', { method: 'POST' })
+                .then(() => updateHistory());
+        });
+
+        // Update status and history every 2 seconds
+        setInterval(() => {
+            updateStatus();
+            updateHistory();
+        }, 2000);
+
+        // Initial updates
+        updateStatus();
+        updateHistory();
+
+        // WebSocket for real-time updates
+        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        const sensorDataDiv = document.getElementById('sensorData');
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'console') {
+                addConsoleMessage(data.message);
+            } else if (data.type === 'sensor') {
+                sensorDataDiv.textContent = JSON.stringify(data.data, null, 2);
+            }
+        };
+
+        // Initial sensor data fetch
+        fetch('/api/current_data')
+            .then(response => response.json())
+            .then(data => {
+                sensorDataDiv.textContent = JSON.stringify(data, null, 2);
+            });
+    </script>
+</body>
+</html>
