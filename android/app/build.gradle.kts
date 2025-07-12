@@ -5,14 +5,16 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+
 android {
     namespace = "com.example.early_guardian"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true  // ✅ Kotlin DSL syntax uses 'isCoreLibraryDesugaringEnabled'
     }
 
     kotlinOptions {
@@ -37,8 +39,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-}
 
-flutter {
-    source = "../.."
+    flutter {
+        source = "../.."
+    }
+}
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")  // ✅ Kotlin DSL style
 }
